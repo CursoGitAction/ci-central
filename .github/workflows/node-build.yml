@@ -1,0 +1,33 @@
+name: Reusable Node Build
+
+on:
+  workflow_call:
+    inputs:
+      build-script:
+        required: true
+        type: string
+        default: 'build'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Correr Linter y Tests
+        run: |
+          npm run lint --if-present
+          npm run test --if-present
+
+      - name: Ejecutar build
+        run: npm run ${{ inputs.build-script }}
