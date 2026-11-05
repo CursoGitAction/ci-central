@@ -1,0 +1,30 @@
+name: Node Build Matrix
+
+on:
+  workflow_call:
+    inputs:
+      build-script:
+        required: false
+        type: string
+        default: 'build'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node.yml
+
+      - name: Correr Linter y Tests
+        run: |
+          npm run lint --if-present
+
+      - name: Ejecutar build
+        run: npm run ${{ inputs.build-script }}
