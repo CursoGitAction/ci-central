@@ -19,6 +19,10 @@ jobs:
         exclude:
           - os: ubuntu-latest
             node-version: 22
+        include:
+          - os: windows-latest
+            node-version: 24
+            
 
     steps:
       - name: Checkout del código
