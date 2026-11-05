@@ -1,0 +1,20 @@
+name: Setup Node.js
+description: Configurar Node, cachea dependencias e instala paquetes.
+
+inputs:
+  node-version:
+    description: 'Versión de Node.js a instalar'
+    required: false
+    default: '22'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configurar Node.js
+      uses: actions/setup-node@v7.1.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+
+    - name: Instalar dependencias
+      run: npm install
