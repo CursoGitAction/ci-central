@@ -1,0 +1,38 @@
+name: Node Build Cache Example
+
+on:
+  workflow_call:
+    inputs:
+      build-script:
+        required: false
+        type: string
+        default: 'build'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Obtener caché de dependencias de Node
+        id: npm-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Instalar dependencias
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Ejecutar build
+        run: npm run ${{ inputs.build-script }}
+
+      - name: Subir artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: dist/
+          name: dist-files
+          retention-days: 7
