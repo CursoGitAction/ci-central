@@ -1,0 +1,59 @@
+name: Node Build Concurrency Example
+
+on:
+  workflow_call:
+    inputs:
+      build-script:
+        required: false
+        type: string
+        default: 'build'
+  
+# Ejemplos de uso de la variable github:
+# github.repository -> "owner/repo" -> "CursoGitAction/ci-central"
+# github.repository_owner -> "owner" -> "CursoGitAction"
+# github.respository_id -> "id" -> 1234567890
+# github.respositoryUrl -> "url" -> "https://github.com/CursoGitAction/ci-central"
+# github.ref -> "refs/heads/main" -> "refs/heads/main"
+# github.ref_name -> "main" -> "main"
+# github.actor -> "owner" -> "CursoGitAction"
+# github.triggering_actor -> "owner" -> "CursoGitAction"
+# github.event_name -> "push" -> "push"
+# github.token | secrets.GITHUB_TOKEN -> "token" -> "ghp_1234567890"
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-
+  # "Node Build Concurrency Example-refs/heads/main"
+  # "Node Build Concurrency Example-refs/heads/dev"
+  # "Node Build Concurrency Example-refs/heads/prod"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20]
+
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Correr Linter y Tests
+        run: |
+          npm run lint --if-present
+          npm run test --if-present
+
+      - name: Ejecutar build
+        run: npm run ${{ inputs.build-script }}
