@@ -15,7 +15,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: us-east-2
+          aws-region: us-east-1
 
       - name: Verificar identidad temporal
         run: aws sts get-caller-identity
