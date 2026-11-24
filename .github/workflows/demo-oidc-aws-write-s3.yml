@@ -1,0 +1,32 @@
+name: Demo OIDC AWS Write S3
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  escribir-en-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener credenciales temporales desde AWS
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-2
+      
+      - name: Verificar identidad asumida
+        run: aws sts get-caller-identity
+
+      - name: Crear y subir archivo a S3
+        run: |
+          echo "Hola Mundo, creamos archivo desde GitHub Actions - $(date)" > archivo-runner.txt
+          aws s3 cp archivo-runner.txt s3://${{ vars.AWS_BUCKET_NAME }}/github-actions-demo.txt
+
+      - name: Verificar archivos en S3
+        run: aws s3 ls s3://${{ vars.AWS_BUCKET_NAME }}
+
+      - name: Leer archivo desde S3
+        run: aws s3 cp s3://${{ vars.AWS_BUCKET_NAME }}/github-actions-demo.txt -
