@@ -18,7 +18,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: us-east-2
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Verificar identidad asumida
         run: aws sts get-caller-identity
@@ -40,3 +40,11 @@ jobs:
 
       - name: Verificar imagen en AWS ECR
         run: aws ecr describe-images --repository-name ${{ vars.AWS_ECR_REPOSITORY_NAME }}
+
+      - name: Deploy to AWS ECS
+        run: |
+          aws ecs update-service \
+            --cluster ${{ vars.AWS_ECS_CLUSTER_NAME }} \
+            --service ${{ vars.AWS_ECS_SERVICE_NAME }} \
+            --force-new-deployment
+            --region ${{ vars.AWS_REGION }}
