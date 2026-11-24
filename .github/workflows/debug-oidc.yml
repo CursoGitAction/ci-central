@@ -1,0 +1,25 @@
+name: Debug Token OIDC
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  inspeccionar-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener y decodificar el JWT de GitHub OIDC
+        run: |
+          # 1. Pedir el token JWT al endpoint interno de OIDC del runner
+          OIDC_RESPONSE=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com")
+
+          # 2. Extraer el JWT
+          JWT=$(echo "$OIDC_RESPONSE" | jq -r '.value')
+
+          # 3. Decodificar la parte central (payload) en Base64URL y mostrar los claims
+          echo "=== CONTENIDO REAL DEL TOKEN OIDC ==="
+          echo "$JWT" | cut -d'.' -f2 | tr '_-' '/+' | base64 -d 2>/dev/null | jq .
