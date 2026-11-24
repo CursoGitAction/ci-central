@@ -1,24 +1,26 @@
-name: Demo OIDC AWS
+name: Demo AWS OIDC
 
 on:
   workflow_dispatch:
 
 permissions:
-  id-token: write 
+  id-token: write
   contents: read
 
 jobs:
-  conectar-aws:
+  probar-conexion:
     runs-on: ubuntu-latest
     steps:
-      - name: Autenticar con AWS via OIDC
-        uses: aws-actions/configure-aws-credentials@v6
+      - name: Obtener credenciales temporales desde AWS
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: us-east-2
 
-      - name: Verificar identidad temporal
+      - name: Verificar identidad asumida
         run: aws sts get-caller-identity
 
-      - name: Listar archivos de S3
-        run: aws s3 ls s3://demo-oidc-github-curso-git-action
+      - name: Leer archivo desde S3
+        run: |
+          aws s3 ls s3://${{ vars.AWS_BUCKET_NAME }}
+          aws s3 cp s3://${{ vars.AWS_BUCKET_NAME }}/prueba.txt -
